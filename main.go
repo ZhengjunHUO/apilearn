@@ -22,10 +22,15 @@ var clusters = []k8sCluster{
 
 func main() {
 	server := gin.Default()
+
 	// associate GET methods and path with a handler func
-	// do $ curl http://localhost:8088/clusters
+	// eg. $ curl http://localhost:8088/clusters
 	server.GET("/clusters", getClusters)
-	/* do
+
+	// eg. curl http://localhost:8088/clusters/1
+	server.GET("/clusters/:id", getClusterByID)
+
+	/* eg.
 	$ curl http://localhost:8088/clusters \
 		--include \
 		--header "Content-Type: application/json" \
@@ -42,6 +47,21 @@ func getClusters(c *gin.Context) {
 	// Context carries request details and more ...
 	// marshaling the struct to json & add to response
 	c.IndentedJSON(http.StatusOK, clusters)
+}
+
+// handler func to get a specific k8s cluster
+func getClusterByID(c *gin.Context) {
+	// need a placeholder ":id" in the path when register this handler to api server
+	id := c.Param("id")
+
+	for _, cluster := range clusters {
+		if cluster.ID == id {
+			c.IndentedJSON(http.StatusOK, cluster)
+			return
+		}
+	}
+
+	c.IndentedJSON(http.StatusNotFound, gin.H{"INFO": "cluster not found"})
 }
 
 // handler func to add a k8s cluster to the pool
